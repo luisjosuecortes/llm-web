@@ -10,7 +10,6 @@ import { Message } from "@/app/lib/types";
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDownloadingModel, setIsDownloadingModel] = useState(false);
 
   const handleSendMessage = async (content: string) => {
     // Crear mensaje del usuario
@@ -23,71 +22,24 @@ export function ChatInterface() {
 
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
-    
-    // Detectar si es el primer mensaje (potencial descarga)
-    if (messages.length === 0) {
-      setIsDownloadingModel(true);
-    }
 
     try {
-      // Llamar a la API de BitNet
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'system',
-              content: 'Eres BitNet 1.58 2B, un asistente AI ultra-eficiente. Responde de manera útil y amigable en español.'
-            },
-            ...messages.map(msg => ({
-              role: msg.role,
-              content: msg.content
-            })),
-            {
-              role: 'user',
-              content
-            }
-          ],
-          stream: false
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const assistantContent = data.choices?.[0]?.message?.content || 
-        'Error: No se pudo obtener respuesta del modelo BitNet.';
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: assistantContent,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-      setIsLoading(false);
-      setIsDownloadingModel(false);
-
+      // TODO: Aquí integraremos la API de BitNet
+      // Por ahora, simulamos una respuesta
+      setTimeout(() => {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: `¡Hola! Soy BitNet 1.58 2B. Has preguntado: "${content}". Esto es una respuesta de prueba mientras implementamos la integración completa con el modelo.`,
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, assistantMessage]);
+        setIsLoading(false);
+      }, 1000);
     } catch (error) {
-      console.error('Error communicating with BitNet:', error);
-      
-      // Mensaje de error amigable
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: '❌ Lo siento, hubo un error al comunicarme con BitNet. Por favor intenta de nuevo.',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, errorMessage]);
+      console.error('Error sending message:', error);
       setIsLoading(false);
-      setIsDownloadingModel(false);
     }
   };
 
@@ -147,12 +99,7 @@ export function ChatInterface() {
                           <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                           <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
-                        <span className="text-sm text-gray-400">
-                          {isDownloadingModel ? 
-                            '📥 Descargando modelo BitNet (1.18GB)... Esto puede tomar hasta 5 minutos en el primer uso.' :
-                            'BitNet está pensando...'
-                          }
-                        </span>
+                        <span className="text-sm text-gray-400">BitNet está pensando...</span>
                       </div>
                     </div>
                   </div>

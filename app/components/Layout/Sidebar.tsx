@@ -11,7 +11,6 @@ import {
   Settings, 
   User 
 } from "lucide-react";
-import { BitNetStatus } from "../BitNet/BitNetStatus";
 
 export function Sidebar() {
   return (
@@ -50,11 +49,6 @@ export function Sidebar() {
           </p>
         </div>
       </ScrollArea>
-
-      {/* BitNet Status */}
-      <div className="p-4 border-t border-gray-800/50">
-        <BitNetStatus />
-      </div>
 
       {/* Bottom Section */}
       <div className="p-4 border-t border-gray-800/50">
