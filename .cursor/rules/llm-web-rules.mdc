@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Prefer simple and reasonable code implementation over premature optimization.
+Always search for documentation for the best practices on web.
