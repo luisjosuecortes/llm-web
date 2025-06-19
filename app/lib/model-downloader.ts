@@ -19,8 +19,11 @@ export const BITNET_MODEL: ModelInfo = {
 export async function downloadModel(): Promise<string> {
   console.log('🔄 Verificando modelo BitNet...');
   
-  // En desarrollo, usar archivo local si existe
-  if (process.env.NODE_ENV === 'development') {
+  // TEMPORAL: Para testing - forzar descarga incluso en desarrollo
+  const FORCE_DOWNLOAD = process.env.FORCE_MODEL_DOWNLOAD === 'true';
+  
+  // En desarrollo, usar archivo local si existe (a menos que se fuerce descarga)
+  if (process.env.NODE_ENV === 'development' && !FORCE_DOWNLOAD) {
     const localPath = join(process.cwd(), 'public', 'ggml-model-i2_s.gguf');
     if (existsSync(localPath)) {
       console.log('✅ Modelo local encontrado:', localPath);
