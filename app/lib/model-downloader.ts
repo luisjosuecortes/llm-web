@@ -44,34 +44,53 @@ export async function downloadModel(): Promise<string> {
     console.log('📥 Descargando modelo BitNet desde Hugging Face...');
     console.log('📍 URL:', BITNET_MODEL.url);
     console.log('💾 Tamaño:', BITNET_MODEL.size);
+    console.log('⏰ Tiempo estimado: 2-5 minutos');
     
     // Crear directorio si no existe
     mkdirSync('/tmp', { recursive: true });
     
-    // Descargar el modelo
-    const response = await fetch(BITNET_MODEL.url, {
-      headers: {
-        'User-Agent': 'BitNet-Web-App/1.0'
+    // Descargar el modelo con timeout extendido
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 280000); // 4.5 minutos timeout
+    
+    try {
+      const response = await fetch(BITNET_MODEL.url, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'BitNet-Web-App/1.0',
+          'Accept': 'application/octet-stream',
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      
+      // Verificar tamaño del contenido
+      const contentLength = response.headers.get('content-length');
+      if (contentLength) {
+        const sizeMB = parseInt(contentLength) / (1024 * 1024);
+        console.log(`📊 Descargando ${sizeMB.toFixed(0)}MB...`);
+      }
+      
+      // Obtener el contenido como ArrayBuffer con progreso
+      const buffer = await response.arrayBuffer();
+      console.log('✅ Descarga completa, guardando archivo...');
+      
+      // Guardar el archivo (en Vercel esto va a /tmp)
+      const fs = await import('fs/promises');
+      await fs.writeFile(tmpPath, Buffer.from(buffer));
+      
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error?.name === 'AbortError') {
+        throw new Error('Timeout: La descarga tardó más de 4.5 minutos');
+      }
+      throw error;
     }
-    
-    // Verificar tamaño del contenido
-    const contentLength = response.headers.get('content-length');
-    if (contentLength) {
-      const sizeMB = parseInt(contentLength) / (1024 * 1024);
-      console.log(`📊 Descargando ${sizeMB.toFixed(0)}MB...`);
-    }
-    
-    // Obtener el contenido como ArrayBuffer
-    const buffer = await response.arrayBuffer();
-    
-    // Guardar el archivo (en Vercel esto va a /tmp)
-    const fs = await import('fs/promises');
-    await fs.writeFile(tmpPath, Buffer.from(buffer));
     
     console.log('✅ Modelo descargado exitosamente:', tmpPath);
     return tmpPath;

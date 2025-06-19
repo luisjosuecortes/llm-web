@@ -10,6 +10,7 @@ import { Message } from "@/app/lib/types";
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloadingModel, setIsDownloadingModel] = useState(false);
 
   const handleSendMessage = async (content: string) => {
     // Crear mensaje del usuario
@@ -22,6 +23,11 @@ export function ChatInterface() {
 
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
+    
+    // Detectar si es el primer mensaje (potencial descarga)
+    if (messages.length === 0) {
+      setIsDownloadingModel(true);
+    }
 
     try {
       // Llamar a la API de BitNet
@@ -66,6 +72,7 @@ export function ChatInterface() {
       
       setMessages(prev => [...prev, assistantMessage]);
       setIsLoading(false);
+      setIsDownloadingModel(false);
 
     } catch (error) {
       console.error('Error communicating with BitNet:', error);
@@ -80,6 +87,7 @@ export function ChatInterface() {
       
       setMessages(prev => [...prev, errorMessage]);
       setIsLoading(false);
+      setIsDownloadingModel(false);
     }
   };
 
@@ -139,7 +147,12 @@ export function ChatInterface() {
                           <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                           <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
-                        <span className="text-sm text-gray-400">BitNet está pensando...</span>
+                        <span className="text-sm text-gray-400">
+                          {isDownloadingModel ? 
+                            '📥 Descargando modelo BitNet (1.18GB)... Esto puede tomar hasta 5 minutos en el primer uso.' :
+                            'BitNet está pensando...'
+                          }
+                        </span>
                       </div>
                     </div>
                   </div>
