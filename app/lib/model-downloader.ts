@@ -12,7 +12,7 @@ interface ModelInfo {
 export const BITNET_MODEL: ModelInfo = {
   name: 'BitNet 1.58 2B GGUF',
   size: '1.18GB',
-  url: 'https://huggingface.co/Microsoft/BitNet-b1_58-2B-instruct-GGUF/resolve/main/ggml-model-i2_s.gguf',
+  url: 'https://huggingface.co/microsoft/bitnet-b1.58-2B-4T-gguf/resolve/main/ggml-model-i2_s.gguf',
   path: '/tmp/ggml-model-i2_s.gguf'
 };
 
